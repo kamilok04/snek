@@ -1,3 +1,5 @@
+pushd %~p0
 ..\narzedzia\nesasm3 snek.asm
 pause
-..\narzedzia\emulator\fceuxdsp snek.nes
+..\narzedzia\emulator\fceux64 snek.nes
+popd

@@ -1,3 +1,8 @@
+; DO ZROBIENIA
+; -- wymyślić sprity i palety
+; -- zrozumieć architekturę NES
+; -- napić się z kimś
+
   .inesprg 1	; kod programu 1x 16KB
   .ineschr 1	; sprite 1x 8KB
   .inesmap 0	; bez banków
@@ -40,6 +45,20 @@ czekaj2:
 	bit $2002
 	bpl czekaj2
 	
+wczytajPalety:
+	lda $2002		; przygotuj PPU
+	lda #$3f
+	sta $2006		; wysoki bajt adresu
+	lda #$00
+	sta $2006		; niski bajt adresu
+	ldx #$0
+petlaPalet:
+	lda paletyTla, x
+	sta $2007		; zapisz kolor w PPU
+	inx
+	cpx #$10		; 16 kolorów, po 4 na paletę
+	bne petlaPalet
+	
 whileTrue:
 	jmp whileTrue	; NIE tu jest gra
 	
@@ -47,6 +66,21 @@ NMI:
 	rti
 	
   .bank 1
+  .org $e000
+  
+paletyTla:
+  .db $22,$29,$1A,$0F
+  .db $22,$36,$17,$0F	
+  .db $22,$30,$21,$0F	
+  .db $22,$27,$17,$0F	
+  
+paletyObiektow: 
+  .db $22,$16,$27,$18
+  .db $22,$1A,$30,$27
+  .db $22,$16,$30,$27
+  .db $22,$0F,$36,$17 
+
+
   .org $fffa		; IDT
   .dw NMI			; jeśli NMI
   .dw RESET			; jeśli reset
