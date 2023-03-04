@@ -1,7 +1,0 @@
-; snek.ass
-whileTrue                        = $C03D
-czyscmem                         = $C019
-RESET                            = $C000
-NMI                              = $C040
-czekaj1                          = $C014
-czekaj2                          = $C038
