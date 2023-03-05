@@ -52,17 +52,82 @@ wczytajPalety:
 	lda #$00
 	sta $2006		; niski bajt adresu
 	ldx #$0
-petlaPalet:
+	
+petlaPaletTel:
 	lda paletyTla, x
 	sta $2007		; zapisz kolor w PPU
 	inx
 	cpx #$10		; 16 kolorów, po 4 na paletę
-	bne petlaPalet
+	bne petlaPaletTel
+	ldx #$0
+
+petlaPaletObiektow:
+	lda paletyObiektow, x
+	sta $2007		; zapisz kolor w PPU
+	inx
+	cpx #$10		; 16 kolorów, po 4 na paletę
+	bne petlaPaletObiektow
+	
+	lda #%10000000 	; włącz NMI, obiekty z tabeli 0
+	sta $2000
+	
+	lda #%00010000	; włącz renderowanie obiektów
+	sta $2001
 	
 whileTrue:
 	jmp whileTrue	; NIE tu jest gra
 	
 NMI:
+	lda #$0
+	sta $2003		; niski bajt  adresu tabeli obiektów
+	lda #$2
+	sta $4014		; wysoki bajt ==||==
+					; adres tabeli: $0200
+					
+rysuj:				; kod NMI tu wpada
+
+	; WSPÓŁRZĘDNE Y
+	
+	lda #$8			; ósmy piksel z góry 
+					; (pierwsze 8px jest specjalne)
+	sta $200		; ogon
+	sta $204		; ciało
+	sta $208		; ciało2
+	sta $20c		; łeb
+	
+	; KOORDYNATY TABELI OBIEKTÓW (snek.chr)
+	
+	lda #$10		; ogon
+	sta $201
+	lda #$11		; ciało
+	sta $205
+	sta $209
+	lda #$12		; łeb
+	sta $20d
+	
+	; SPECJALNE ŻYCZENIA (patrz cheatsheet.txt)
+	
+	lda #$0			; brak
+	sta $202
+	sta $206
+	sta $20e
+	lda #%01000000	; odbij w pionie
+	sta $20a
+	
+	; WSPÓŁRZĘDNE X
+	
+	lda #$8			; ósmy piksel z lewej
+					; (pierwsze 8px jest specjalne)
+	sta $203		; ogon
+	lda #$10		; szesnasty piksel z lewej itd..
+	sta $207		; ciało
+	lda #$18
+	sta	$20b		; ciało2
+	lda #$20
+	sta $20f		; łeb
+	
+	; KONIEC RYSOWANIA (i NMI)
+	
 	rti
 	
   .bank 1
@@ -75,7 +140,7 @@ paletyTla:
   .db $22,$27,$17,$0F	
   
 paletyObiektow: 
-  .db $22,$16,$27,$18
+  .db $a,$13,$20,$e		; zielony, fiolet, biały, czarny
   .db $22,$1A,$30,$27
   .db $22,$16,$30,$27
   .db $22,$0F,$36,$17 
