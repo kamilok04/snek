@@ -8,6 +8,11 @@
   .inesmap 0	; bez banków
   .inesmir 1	; kopia tła
   
+  ; ZMIENNE
+  .rsset $0
+pX  .rs 1
+  ; -------
+  
   .bank 0
   .org $C000	; pierwszy bank
 
@@ -68,11 +73,23 @@ petlaPaletObiektow:
 	cpx #$10		; 16 kolorów, po 4 na paletę
 	bne petlaPaletObiektow
 	
+	ldx #$0
+	
+rysujObiekty:
+	lda obiekty,x
+	sta $200,x
+	inx
+	cpx #$10
+	bne rysujObiekty
+	
 	lda #%10000000 	; włącz NMI, obiekty z tabeli 0
 	sta $2000
 	
 	lda #%00010000	; włącz renderowanie obiektów
 	sta $2001
+	
+	lda $020f
+	sta pX
 	
 whileTrue:
 	jmp whileTrue	; NIE tu jest gra
@@ -83,50 +100,19 @@ NMI:
 	lda #$2
 	sta $4014		; wysoki bajt ==||==
 					; adres tabeli: $0200
-					
-rysuj:				; kod NMI tu wpada
-
-	; WSPÓŁRZĘDNE Y
-	
-	lda #$8			; ósmy piksel z góry 
-					; (pierwsze 8px jest specjalne)
-	sta $200		; ogon
-	sta $204		; ciało
-	sta $208		; ciało2
-	sta $20c		; łeb
-	
-	; KOORDYNATY TABELI OBIEKTÓW (snek.chr)
-	
-	lda #$10		; ogon
-	sta $201
-	lda #$11		; ciało
-	sta $205
-	sta $209
-	lda #$12		; łeb
-	sta $20d
-	
-	; SPECJALNE ŻYCZENIA (patrz cheatsheet.txt)
-	
-	lda #$0			; brak
-	sta $202
-	sta $206
-	sta $20e
-	lda #%01000000	; odbij w pionie
-	sta $20a
-	
-	; WSPÓŁRZĘDNE X
-	
-	lda #$8			; ósmy piksel z lewej
-					; (pierwsze 8px jest specjalne)
-	sta $203		; ogon
-	lda #$10		; szesnasty piksel z lewej itd..
-	sta $207		; ciało
-	lda #$18
-	sta	$20b		; ciało2
-	lda #$20
-	sta $20f		; łeb
-	
-	; KONIEC RYSOWANIA (i NMI)
+	lda pX			; obecna pozycja prawej strony węża
+	tax
+	clc
+	adc #$8
+	sta $20f
+	sbc #$8
+	sta $20b
+	sbc #$8
+	sta $207
+	sbc #$8
+	sta $203
+	inx 
+	stx pX
 	
 	rti
 	
@@ -145,6 +131,11 @@ paletyObiektow:
   .db $22,$16,$30,$27
   .db $22,$0F,$36,$17 
 
+obiekty:
+  .db $8,$10,$0,$8
+  .db $8,$11,$0,$10
+  .db $8,$11,%01000000,$18
+  .db $8,$12,$0,$20
 
   .org $fffa		; IDT
   .dw NMI			; jeśli NMI

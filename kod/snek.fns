@@ -1,13 +1,14 @@
 ; snek.asm
-whileTrue                        = $C06E
+rysujObiekty                     = $C066
+whileTrue                        = $C081
 paletyObiektow                   = $E010
 wczytajPalety                    = $C03D
 petlaPaletObiektow               = $C059
-rysuj                            = $C07B
 czyscmem                         = $C019
 RESET                            = $C000
 petlaPaletTel                    = $C04C
-NMI                              = $C071
+obiekty                          = $E020
+NMI                              = $C084
 paletyTla                        = $E000
 czekaj1                          = $C014
 czekaj2                          = $C038
